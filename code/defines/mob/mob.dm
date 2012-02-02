@@ -99,7 +99,7 @@
 	var/canmove = 1.0
 	var/eye_stat = null//Living, potentially Carbon
 
-
+	var/name_archive //For admin things like possession
 
 	var/timeofdeath = 0.0//Living
 	var/cpr_time = 1.0//Carbon
@@ -164,7 +164,7 @@
 	var/logged_in = 0
 
 	var/underwear = 1//Human
-	var/be_syndicate = 0//This really should be a client variable.
+	var/be_syndicate = 0 //This really should be a client variable.  EDIT: Hijacked for my own nefarious purposes!  --SkyMarshal
 	var/be_random_name = 0
 	var/const/blindness = 1//Carbon
 	var/const/deafness = 2//Carbon
@@ -247,6 +247,10 @@ the mob is also allowed to move without any sort of restriction. For instance, i
 //	var/obj/effect/organstructure/organStructure = null //for dem organs
 	var/list/organs = list(  )	//List of organs.
 
+//Yes, yes I did.  --SkyMarshal
+	var/list/atom/hallucinations = list()
+	var/halloss = 0
+	var/hallucination = 0
 
 /mob/proc/contract_disease(var/datum/disease/virus, var/skip_this = 0, var/force_species_check=1)
 //	world << "Contract_disease called by [src] with virus [virus]"

@@ -101,6 +101,12 @@ datum
 			id = "blood"
 			reagent_state = LIQUID
 			color = "#C80000" // rgb: 200, 0, 0
+			on_mob_life(var/mob/living/M)
+				if(istype(M, /mob/living/carbon/human) && blood_incompatible(data["blood_type"],M.dna.b_type))
+					M.adjustToxLoss(rand(1.5,3))
+					M.adjustOxyLoss(rand(1.5,3))
+				..()
+				return
 
 			reaction_mob(var/mob/M, var/method=TOUCH, var/volume)
 				var/datum/reagent/blood/self = src
@@ -149,8 +155,8 @@ datum
 					var/obj/effect/decal/cleanable/blood/blood_prop = locate() in T //find some blood here
 					if(!blood_prop) //first blood!
 						blood_prop = new(T)
-						blood_prop.blood_DNA = self.data["blood_DNA"]
-						blood_prop.blood_type = self.data["blood_type"]
+						blood_prop.blood_DNA.len++
+						blood_prop.blood_DNA[blood_prop.blood_DNA.len] = list(self.data["blood_DNA"], self.data["blood_type"])
 
 					for(var/datum/disease/D in self.data["viruses"])
 						var/datum/disease/newVirus = new D.type
@@ -174,7 +180,7 @@ datum
 					var/obj/effect/decal/cleanable/blood/blood_prop = locate() in T
 					if(!blood_prop)
 						blood_prop = new(T)
-						blood_prop.blood_DNA = self.data["blood_DNA"]
+						blood_prop.blood_DNA = list(self.data["blood_DNA"])
 					for(var/datum/disease/D in self.data["viruses"])
 						var/datum/disease/newVirus = new D.type
 						blood_prop.viruses += newVirus
@@ -191,7 +197,7 @@ datum
 					var/obj/effect/decal/cleanable/xenoblood/blood_prop = locate() in T
 					if(!blood_prop)
 						blood_prop = new(T)
-						blood_prop.blood_DNA = self.data["blood_DNA"]
+						blood_prop.blood_DNA = list(self.data["blood_DNA"])
 					for(var/datum/disease/D in self.data["viruses"])
 						var/datum/disease/newVirus = new D.type
 						blood_prop.viruses += newVirus
@@ -1525,6 +1531,19 @@ datum
 				for(var/mob/living/carbon/metroid/M in T)
 					M.adjustToxLoss(rand(15,30))
 
+		LSD
+			name = "LSD"
+			id = "LSD"
+			description = "A hallucinogen"
+			reagent_state = LIQUID
+			color = "#B31008" // rgb: 139, 166, 233
+
+			on_mob_life(var/mob/M)
+				if(!M) M = holder.my_atom
+				M:hallucination += 5
+				..()
+				return
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		nanites
@@ -1816,7 +1835,7 @@ datum
 
 		coco
 			name = "Coco Powder"
-			id = "Coco Powder"
+			id = "coco"
 			description = "A fatty, bitter paste made from coco beans."
 			reagent_state = SOLID
 			nutriment_factor = 5 * REAGENTS_METABOLISM
