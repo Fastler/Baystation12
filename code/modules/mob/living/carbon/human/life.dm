@@ -10,6 +10,8 @@
 
 		// used to do some stuff only on every X life tick
 		life_tick = 0
+		isbreathing = 1
+		holdbreath = 0
 
 /mob/living/carbon/human/Life()
 	set invisibility = 0
@@ -113,17 +115,14 @@
 		handle_health_updates()
 			// if the mob has enough health, she should slowly heal
 			if(health >= 0)
-				var/pr = 5
+				var/pr = 10
 				if(stat == 1) // sleeping means faster healing
-					pr += 3
+					pr += 5
 				if(prob(pr))
 					heal_organ_damage(1,1)
 					adjustToxLoss(-1)
 			else if(health < 0)
-				var/pr = 8
-				// sleeping means slower damage
-				if(stat == 1)
-					pr = 3
+				var/pr = 80
 				if(prob(pr))
 					adjustToxLoss(1)
 
@@ -159,7 +158,7 @@
 				//	a.hallucinate(src)
 				if(!handling_hal && hallucination > 20)
 					spawn handle_hallucinations() //The not boring kind!
-				hallucination -= 1
+				hallucination -= 2
 				//if(health < 0)
 				//	for(var/obj/a in hallucinations)
 				//		del a
@@ -272,16 +271,37 @@
 			var/datum/air_group/breath
 			// HACK NEED CHANGING LATER
 			if(health < config.health_threshold_dead)
-				losebreath++
+				isbreathing = 0
+				spawn emote("stopbreath")
 
-			if(losebreath>0 && prob(90)) //Suffocating so do not take a breath
-				losebreath--
-				if (prob(75)) //High chance of gasping for air
-					spawn emote("gasp")
+			if(holdbreath)
+				isbreathing = 0
+
+			if(isbreathing)
+				// are we running out of air in our lungs?
+				if(losebreath > 0)
+					// inaprovaline prevents the need to breathe for a while
+					if(reagents.has_reagent("inaprovaline"))
+						losebreath = 0
+					else
+						// we're running out of air, gasp for it!
+						if (prob(25)) //High chance of gasping for air
+							spawn emote("gasp")
+			else if(health >= 0)
+				if(holdbreath)
+					// we're simply holding our breath, see if we can hold it longer
+					if(health < 30)
+						holdbreath = 0
+						isbreathing = 1
+						spawn emote("custom h inhales sharply.")
+				else
+					isbreathing = 1
+					emote("breathe")
+			else
 				if(istype(loc, /obj/))
 					var/obj/location_as_object = loc
 					location_as_object.handle_internal_lifeform(src, 0)
-			else
+			if(isbreathing)
 				//First, check for air from internal atmosphere (using an air tank and mask generally)
 				breath = get_breath_from_internal(BREATH_VOLUME) // Super hacky -- TLE
 				//breath = get_breath_from_internal(0.5) // Manually setting to old BREATH_VOLUME amount -- TLE

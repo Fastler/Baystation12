@@ -52,6 +52,8 @@
 		return 1
 	else if(other.universal_speak || src.universal_speak)
 		return 1
+	else if(isAI(src) && ispAI(other))
+		return 1
 	return 0
 
 /mob/proc/say_quote(var/text)

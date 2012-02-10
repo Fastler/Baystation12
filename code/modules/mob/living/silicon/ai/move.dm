@@ -43,13 +43,16 @@
 	var/list/old_types = dd_text2list("[A.type]", "/")
 
 	for(var/obj/machinery/camera/current in world)
-		if(user.network != current.network)	continue
-		if(!current.status)	continue	//	ignore disabled cameras
+		if( !(current.network in user.networks) )	continue
+		if(!current.status)	continue			//	ignore disabled cameras
 
 		//make sure it's the right direction
 		if(dx && (current.x * dx <= old.x * dx))
 			continue
 		if(dy && (current.y * dy <= old.y * dy))
+			continue
+		//only let the player move to cameras on the same zlevel
+		if(current.z != old.z)
 			continue
 
 		var/shared_types = 0 //how many levels deep the old camera and the closest camera's areas share

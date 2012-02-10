@@ -11,9 +11,12 @@
 
 //when adding a new camera network, you should only need to update these two procs
 	New()
-		possibleNets["Engineering"] = access_engine
-		possibleNets["SS13"] = access_security
-		possibleNets["Outpost"] = access_mining
+		possibleNets["Engineering"] = access_ce
+		possibleNets["SS13"] = access_hos
+		possibleNets["Mining"] = access_mining
+		possibleNets["Cargo"] = access_qm
+		possibleNets["Research"] = access_rd
+		possibleNets["Medbay"] = access_cmo
 
 	proc/updateBuildPath()
 		build_path = ""
@@ -22,14 +25,25 @@
 				if("SS13")
 					build_path = "/obj/machinery/computer/security"
 				if("Engineering")
-					build_path = "/obj/machinery/computer/security/engineeringcam"
-				if("Outpost")
+					build_path = "/obj/machinery/computer/security/engineering"
+				if("Mining")
 					build_path = "/obj/machinery/computer/security/mining"
+				if("Research")
+					build_path = "/obj/machinery/computer/security/research"
+				if("Medbay")
+					build_path = "/obj/machinery/computer/security/medbay"
+				if("Cargo")
+					build_path = "/obj/machinery/computer/security/cargo"
 
 	attackby(var/obj/item/I, var/mob/user)//if(health > 50)
 		..()
 		if(istype(I,/obj/item/weapon/card/emag))
 			if(network)
+				var/obj/item/weapon/card/emag/E = I
+				if(E.uses)
+					E.uses--
+				else
+					return
 				authorised = 1
 				user << "\blue You authorised the circuit network!"
 				updateDialog()
@@ -94,6 +108,11 @@
 					authorised = 1
 			if(istype(I,/obj/item/weapon/card/emag))
 				if(network)
+					var/obj/item/weapon/card/emag/E = I
+					if(E.uses)
+						E.uses--
+					else
+						return
 					authorised = 1
 					usr << "\blue You authorised the circuit network!"
 					updateDialog()

@@ -119,19 +119,22 @@ MASS SPECTROMETER
 				F.fingerprints = md5(M.dna.uni_identity)
 				F.icon_state = "fingerprint1"
 				F.name = text("FPrintC- '[M.name]'")
+
 				user << "\blue Done printing."
 			user << text("\blue [M]'s Fingerprints: [md5(M.dna.uni_identity)]")
-		if ( !(M.blood_DNA) )
+		if ( !(M.blood_DNA.len) )
 			user << "\blue No blood found on [M]"
 		else
 			user << "\blue Blood found on [M]. Analysing..."
 			spawn(15)
-				for(var/i = 1, i < M.blood_DNA.len, i++)
+				for(var/i = 1, i <= M.blood_DNA.len, i++)
 					var/list/templist = M.blood_DNA[i]
 					user << "\blue Blood type: [templist[2]]\nDNA: [templist[1]]"
 		return
 
 	afterattack(atom/A as obj|turf|area, mob/user as mob)
+		if(!(locate(A) in oview(1,user)))
+			return
 		if(src.loc != user)
 			return 0
 		src.add_fingerprint(user)
@@ -142,10 +145,10 @@ MASS SPECTROMETER
 					user << "\blue Blood type: [templist[2]]\nDNA: [templist[1]]"
 			return
 		var/duplicate = 0
-		if ((!A.fingerprints || A.fingerprints.len == 0) && !(A.suit_fibers) && !(A.blood_DNA))
+		if ((!A.fingerprints || A.fingerprints.len == 0) && !(A.suit_fibers) && !(A.blood_DNA.len))
 			user << "\blue Unable to locate any fingerprints, materials, fibers, or blood on [A]!"
 			return 0
-		else if (A.blood_DNA)
+		else if (A.blood_DNA.len)
 			user << "\blue Blood found on [A]. Analysing..."
 			sleep(15)
 			if(!duplicate)
@@ -204,12 +207,12 @@ MASS SPECTROMETER
 				var/list/prints = temp[2]
 				if(!prints)
 					prints = list()
-				if(A.fingerprints)
-					for(var/j = 1, j < (A.fingerprints.len + 1), j++)	//Fingerprints~~~
+				if(A.fingerprints && A.fingerprints.len)
+					for(var/j = 1, j <= A.fingerprints.len, j++)	//Fingerprints~~~
 						var/list/print_test1 = params2list(A.fingerprints[j])
 						var/test_print1 = print_test1[num2text(1)]
 						var/found = 0
-						for(var/k = 1, k < (prints.len + 1), k++)	//Lets see if the print is already in there
+						for(var/k = 1, k <= prints.len, k++)	//Lets see if the print is already in there
 							var/list/print_test2 = params2list(prints[k])
 							var/test_print2 = print_test2[num2text(1)]
 							if(test_print2 == test_print1)	//It is!  Merge!
@@ -221,15 +224,15 @@ MASS SPECTROMETER
 				var/list/fibers = temp[3]
 				if(!fibers)
 					fibers = list()
-				if(A.suit_fibers)
-					for(var/j = 1, j < (A.suit_fibers.len + 1), j++)	//Fibers~~~
+				if(A.suit_fibers && A.suit_fibers.len)
+					for(var/j = 1, j <= A.suit_fibers.len, j++)	//Fibers~~~
 						if(!fibers.Find(A.suit_fibers[j]))	//It isn't!  Add!
 							fibers += A.suit_fibers[j]
 				var/list/blood = temp[4]
 				if(!blood)
 					blood = list()
-				if(A.blood_DNA)
-					for(var/j = 1, j < (A.blood_DNA.len + 1), j++)	//Blood~~~
+				if(A.blood_DNA.len && A.blood_DNA)
+					for(var/j = 1, j <= A.blood_DNA.len, j++)	//Blood~~~
 						if(!blood.Find(A.blood_DNA[j]))	//It isn't!  Add!
 							blood += A.blood_DNA[j]
 				var/list/sum_list[4]	//Pack it back up!
@@ -242,7 +245,11 @@ MASS SPECTROMETER
 		if(!merged)	//Uh, oh!  New data point!
 			var/list/sum_list[4]	//Pack it back up!
 			sum_list[1] = A
-			sum_list[2] = A.fingerprints
+			if(!A.fingerprints)
+				world << "Report this to a dev! [A] was lacking a list() for fingerprints!"
+				sum_list[2] = list()
+			else
+				sum_list[2] = A.fingerprints
 			sum_list[3] = A.suit_fibers
 			sum_list[4] = A.blood_DNA
 			stored.len++

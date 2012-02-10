@@ -6,7 +6,7 @@
 		list/obj/machinery/light/Comms = list( )
 
 	Announce()
-		command_alert("The station is flying through an electrical storm.  Radio communications may be disrupted", "Anomaly Alert")
+//		command_alert("The station is flying through an electrical storm.  Radio communications may be disrupted", "Anomaly Alert")
 
 		for(var/obj/machinery/light/Light in world)
 			if(Light.z == 1 && Light.status != 0)
@@ -17,7 +17,7 @@
 				APCs += APC
 
 		for(var/obj/machinery/door/airlock/Door in world)
-			if(Door.z == 1)
+			if(Door.z == 1 && !istype(Door,/obj/machinery/door/airlock/secure))
 				Doors += Door
 
 		for(var/obj/machinery/telecomms/processor/T in world)

@@ -21,6 +21,8 @@ A list of items and costs is stored under the datum of every game mode, alongsid
 	var/items						// List of items
 	var/list/ItemList				// Parsed list of items
 	var/uses 						// Numbers of crystals
+	// List of items not to shove in their hands.
+	var/list/NotInHand = list(/obj/machinery/singularity_beacon/syndicate)
 
 	New()
 		welcome = ticker.mode.uplink_welcome
@@ -34,7 +36,7 @@ A list of items and costs is stored under the datum of every game mode, alongsid
 		src.menu_message += "Tele-Crystals left: [src.uses]<BR>"
 		src.menu_message += "<HR>"
 		src.menu_message += "<B>Request item:</B><BR>"
-		src.menu_message += "<I>Each item costs a number of tele-crystals as indicated by the number following their name.</I><BR>"
+		src.menu_message += "<I>Each item costs a number of tele-crystals as indicated by the number following their name.</I><br><BR>"
 
 		var/cost
 		var/item
@@ -158,7 +160,7 @@ A list of items and costs is stored under the datum of every game mode, alongsid
 			var/path_obj = text2path(href_list["buy_item"])
 			var/mob/A = src.hostpda.loc
 			var/item = new path_obj(get_turf(src.hostpda))
-			if(ismob(A)) //&& !istype(item, /obj/spawner))
+			if(ismob(A) && !(locate(item) in NotInHand)) //&& !istype(item, /obj/spawner))
 				if(!A.r_hand)
 					item:loc = A
 					A.r_hand = item
@@ -167,6 +169,8 @@ A list of items and costs is stored under the datum of every game mode, alongsid
 					item:loc = A
 					A.l_hand = item
 					item:layer = 20
+			else
+				item:loc = get_turf(A)
 			usr.update_clothing()
 	//		usr.client.onBought("[item:name]")	When we have the stats again, uncomment.
 	/*		if(istype(item, /obj/spawner)) // Spawners need to have del called on them to avoid leaving a marker behind
@@ -183,7 +187,17 @@ A list of items and costs is stored under the datum of every game mode, alongsid
 
 //A Syndicate uplink disguised as a portable radio
 /obj/item/device/uplink/radio/implanted
-	uses = 5
+	New()
+		..()
+		uses = 5
+		return
+
+	explode()
+		var/obj/item/weapon/implant/uplink/U = src.loc
+		var/mob/living/A = U.imp_in
+		A.gib()
+		..()
+
 
 /obj/item/device/uplink/radio
 	name = "ship bounced radio"
@@ -224,12 +238,10 @@ A list of items and costs is stored under the datum of every game mode, alongsid
 		if (usr.stat || usr.restrained())
 			return
 
-		var/mob/living/carbon/human/H = usr
-
-		if (!( istype(H, /mob/living/carbon/human)))
+		if (!( istype(usr, /mob/living/carbon/human)))
 			return 1
 
-		if ((usr.contents.Find(src) || (in_range(src, usr) && istype(src.loc, /turf))))
+		if ((usr.contents.Find(src) || (in_range(src, usr) && istype(src.loc, /turf)) || istype(src.loc,/obj/item/weapon/implant/uplink)))
 			usr.machine = src
 
 			if(href_list["buy_item"])
@@ -237,7 +249,10 @@ A list of items and costs is stored under the datum of every game mode, alongsid
 					var/path_obj = text2path(href_list["buy_item"])
 					var/item = new path_obj(get_turf(src.loc))
 					var/mob/A = src.loc
-					if(ismob(A)) //&& !istype(item, /obj/spawner))
+					if(istype(src.loc,/obj/item/weapon/implant/uplink))
+						var/obj/item/weapon/implant/uplink/U = src.loc
+						A = U.imp_in
+					if(ismob(A) && !(locate(item) in NotInHand)) //&& !istype(item, /obj/spawner))
 						if(!A.r_hand)
 							item:loc = A
 							A.r_hand = item
@@ -246,6 +261,8 @@ A list of items and costs is stored under the datum of every game mode, alongsid
 							item:loc = A
 							A.l_hand = item
 							item:layer = 20
+					else
+						item:loc = get_turf(A)
 	/*				if(istype(item, /obj/spawner)) // Spawners need to have del called on them to avoid leaving a marker behind
 						del item*/
 	//				usr.client.onBought("[item:name]")	When we have the stats again, uncomment.
@@ -289,12 +306,13 @@ A list of items and costs is stored under the datum of every game mode, alongsid
 			else if (href_list["clear_selfdestruct"])
 				src.temp = null
 
-			if (istype(src.loc, /mob))
-				attack_self(src.loc)
-			else
-				for(var/mob/M in viewers(1, src))
-					if (M.client)
-						src.attack_self(M)
+			attack_self(usr)
+//			if (istype(src.loc, /mob))
+//				attack_self(src.loc)
+//			else
+//				for(var/mob/M in viewers(1, src))
+//					if (M.client)
+//						src.attack_self(M)
 		return
 
 	proc/explode()

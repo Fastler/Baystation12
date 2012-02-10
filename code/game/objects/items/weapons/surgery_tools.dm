@@ -357,6 +357,9 @@ CIRCULAR SAW
 
 /obj/item/weapon/autopsy_scanner/verb/print_data()
 	set src in view(usr, 1)
+	if(usr.stat == 2)
+		src << "No."
+		return
 
 	var/scan_data = ""
 	var/n = 1
@@ -1127,8 +1130,8 @@ CIRCULAR SAW
 
 /obj/item/weapon/surgical_tool/bonegel
 	name = "bone gel"
-	icon = 'janitor.dmi'
-	icon_state = "cleaner"
+	icon = 'surgery.dmi'
+	icon_state = "bone gel"
 
 /obj/item/weapon/surgical_tool/bonegel/New()
 	stage += 0
@@ -1151,8 +1154,8 @@ CIRCULAR SAW
 
 /obj/item/weapon/surgical_tool/bonesetter
 	name = "bone setter"
-	icon = 'items.dmi'
-	icon_state = "wrench"
+	icon = 'surgery.dmi'
+	icon_state = "bone setter"
 
 /obj/item/weapon/surgical_tool/bonesetter/New()
 	stage += 1

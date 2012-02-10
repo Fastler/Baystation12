@@ -5,6 +5,7 @@
 	faction = "Station"
 	total_positions = 1
 	spawn_positions = 1
+	supervisors = "the captain"
 
 
 	equip(var/mob/living/carbon/human/H)
@@ -28,6 +29,8 @@
 	faction = "Station"
 	total_positions = 5
 	spawn_positions = 3
+	supervisors = "the chief medical officer"
+	alt_titles = list("Virologist", "Surgeon")
 
 
 	equip(var/mob/living/carbon/human/H)
@@ -51,6 +54,7 @@
 	faction = "Station"
 	total_positions = 2
 	spawn_positions = 2
+	supervisors = "the chief medical officer and research director"
 
 
 	equip(var/mob/living/carbon/human/H)
@@ -65,7 +69,7 @@
 		return 1
 
 
-
+/*
 /datum/job/virologist
 	title = "Virologist"
 	flag = VIROLOGIST
@@ -73,6 +77,7 @@
 	faction = "Station"
 	total_positions = 1
 	spawn_positions = 1
+	supervisors = "the chief medical officer and research director"
 
 
 	equip(var/mob/living/carbon/human/H)
@@ -86,5 +91,5 @@
 		H.equip_if_possible(new /obj/item/clothing/suit/storage/labcoat/virologist(H), H.slot_wear_suit)
 		H.equip_if_possible(new /obj/item/device/flashlight/pen(H), H.slot_s_store)
 		return 1
-
+*/
 

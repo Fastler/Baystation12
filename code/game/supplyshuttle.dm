@@ -317,8 +317,8 @@ var/list/supply_groups = new()
 			reqform.info += "<h3>[station_name] Supply Requisition Form</h3><hr>"
 
 			if (istype(usr:wear_id, /obj/item/weapon/card/id))
-				if(usr:wear_id.registered)
-					idname = usr:wear_id.registered
+				if(usr:wear_id.registered_name)
+					idname = usr:wear_id.registered_name
 				if(usr:wear_id.assignment)
 					idrank = usr:wear_id.assignment
 			if (istype(usr:wear_id, /obj/item/device/pda))
@@ -402,6 +402,11 @@ var/list/supply_groups = new()
 
 /obj/machinery/computer/supplycomp/attackby(I as obj, user as mob)
 	if(istype(I,/obj/item/weapon/card/emag) && !hacked)
+		var/obj/item/weapon/card/emag/E = I
+		if(E.uses)
+			E.uses--
+		else
+			return
 		user << "\blue Special supplies unlocked."
 		src.hacked = 1
 		return

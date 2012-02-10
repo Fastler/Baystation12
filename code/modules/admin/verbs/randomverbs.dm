@@ -315,6 +315,7 @@ Traitors and the like can also be revived with the previous role mostly intact.
 	if(!record_found)//We have to pick their role if they have no record.
 		if(G_found.mind&&G_found.mind.assigned_role)//But they may have an assigned role already.
 			new_character.mind.assigned_role = G_found.mind.assigned_role//Also makes sure our MODE people are equipped right later on.
+			new_character.mind.role_alt_title = G_found.mind.role_alt_title
 		else
 			var/assigned_role = input("Please specify which job the character will be respawned as.", "Assigned role") as null|anything in get_all_jobs()
 			if(!assigned_role)	new_character.mind.assigned_role = "Assistant"//Defaults to assistant.
@@ -528,17 +529,20 @@ Traitors and the like can also be revived with the previous role mostly intact.
 		src << "Only administrators may use this command."
 		return
 	var/input = input(usr, "Please enter anything you want. Anything. Serious.", "What?", "") as message|null
+	var/customname = input(usr, "Pick a title for the report.", "Title") as message|null
 	if(!input)
 		return
+	if(!customname)
+		customname = "NanoTrasen Update"
 	for (var/obj/machinery/computer/communications/C in machines)
 		if(! (C.stat & (BROKEN|NOPOWER) ) )
 			var/obj/item/weapon/paper/P = new /obj/item/weapon/paper( C.loc )
-			P.name = "paper- '[command_name()] Update.'"
+			P.name = "paper - '[command_name()] Update.'"
 			P.info = input
 			C.messagetitle.Add("[command_name()] Update")
 			C.messagetext.Add(P.info)
 
-	command_alert(input);
+	command_alert(input, maintitle=customname);
 
 	world << sound('commandreport.ogg')
 	log_admin("[key_name(src)] has created a command report: [input]")

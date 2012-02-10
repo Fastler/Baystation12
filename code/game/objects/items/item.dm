@@ -100,7 +100,7 @@
 			t = "huge"
 		else
 	if ((usr.mutations & CLUMSY) && prob(50)) t = "funny-looking"
-	usr << text("This is a []\icon[][]. It is a [] item.", !src.blood_DNA ? "" : "bloody ",src, src.name, t)
+	usr << text("This is a []\icon[][]. It is a [] item.", !src.blood_DNA.len ? "" : "bloody ",src, src.name, t)
 	if(src.desc)
 		usr << src.desc
 	return
@@ -195,6 +195,8 @@
 	return
 
 /obj/item/attackby(obj/item/W as obj, mob/user as mob)
+	if(istype(W, /obj/item/device/detective_scanner))
+		return
 	if (istype(W, /obj/item/weapon/packageWrap))
 		var/location = get_turf(src.loc)
 		if(istype(src,/obj/item/weapon/storage) && istype(src.loc, /mob))	//Put it into the bag
@@ -217,6 +219,7 @@
 			O.amount -= 1
 	else if(istype(W,/obj/item/wardrobe))
 		var/obj/item/wardrobe/I = W
+		var/could_fill = 1
 		for (var/obj/O in locate(src.x,src.y,src.z))
 			if (I.contents.len < 20)
 				if(istype(O,/obj/item/wardrobe))
@@ -225,10 +228,14 @@
 					continue
 				I.contents += O;
 			else
-				user << "\blue The wardrobe is full."
-				return
-		user << "\blue You pick up all the items."
-		user.visible_message("\blue [user] gathers up the pile of stuff, and puts it into \the [W]")
+				could_fill = 0
+				break
+
+		if(could_fill)
+			user << "\blue You pick up all the items."
+		else
+			user << "\blue You try to pick up all of the items, but run out of space in the bag."
+		user.visible_message("\blue [user] gathers up[could_fill ? "  " : " most of "]the pile of items and puts it into the [W].")
 		I.update_icon()
 
 /obj/item/attack_self(mob/user as mob)
@@ -439,7 +446,7 @@ mob/proc/flash_weak_pain()
 	else
 		M.take_organ_damage(7)
 	M.eye_blurry += rand(3,4)
-	M.eye_stat += rand(2,4)
+	M.eye_stat += rand(5,9)
 	if (M.eye_stat >= 10)
 		M.eye_blurry += 15+(0.1*M.eye_blurry)
 		M.disabilities |= 1

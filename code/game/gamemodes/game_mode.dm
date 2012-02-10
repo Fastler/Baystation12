@@ -48,14 +48,13 @@ Stealth and Camouflage Items;
 /obj/item/weapon/stamperaser:1:Stamp Remover;
 Whitespace:Seperator;
 Devices and Tools;
-/obj/item/weapon/card/emag:3:Cryptographic Sequencer;
-/obj/item/device/hacktool:3:Hacktool;
+/obj/item/weapon/card/emag:4:Cryptographic Sequencer (Limited uses, almost full access);
+/obj/item/device/hacktool:3:Hacktool (Slow, but stealthy.  Unlimited uses);
 /obj/item/weapon/storage/toolbox/syndicate:1:Fully Loaded Toolbox;
 /obj/item/weapon/aiModule/syndicate:7:Hacked AI Upload Module;
 /obj/item/device/radio/headset/traitor:3:Headset with Binary Translator;
 /obj/item/weapon/plastique:2:C-4 (Destroys walls);
 /obj/item/weapon/syndie/c4explosive:4:Low Power Explosive Charge, with Detonator;
-/obj/item/weapon/syndie/c4explosive/heavy:7:High (!) Power Explosive Charge, with Detonator;
 /obj/item/device/powersink:5:Powersink (DANGER!);
 /obj/machinery/singularity_beacon/syndicate:7:Singularity Beacon (DANGER!);
 Whitespace:Seperator;
@@ -68,6 +67,8 @@ Whitespace:Seperator;
 Badassery;
 /obj/item/toy/syndicateballoon:10:For showing that You Are The BOSS (Useless Balloon);
 Whitespace:Seperator;"}
+
+//obj/item/weapon/syndie/c4explosive/heavy:7:High (!) Power Explosive Charge, with Detonator;
 
 /datum/game_mode/proc/announce() //to be calles when round starts
 	world << "<B>Notice</B>: [src] did not define announce()"
@@ -151,7 +152,7 @@ Whitespace:Seperator;"}
 	for (var/obj/machinery/computer/communications/comm in world)
 		if (!(comm.stat & (BROKEN | NOPOWER)) && comm.prints_intercept)
 			var/obj/item/weapon/paper/intercept = new /obj/item/weapon/paper( comm.loc )
-			intercept.name = "paper- 'Cent. Com. Status Summary'"
+			intercept.name = "paper - 'Cent. Com. Status Summary'"
 			intercept.info = intercepttext
 
 			comm.messagetitle.Add("Cent. Com. Status Summary")

@@ -80,7 +80,7 @@
 			src.botcard.access = get_access("Detective")
 			src.cam = new /obj/machinery/camera(src)
 			src.cam.c_tag = src.name
-			src.cam.network = "SS13"
+			src.cam.network = "Security"
 			if(radio_controller)
 				radio_controller.add_object(src, control_freq, filter = RADIO_SECBOT)
 				radio_controller.add_object(src, beacon_freq, filter = RADIO_NAVBEACONS)
@@ -616,7 +616,7 @@ Auto Patrol: []"},
 					var/obj/item/device/pda/pda = perp:wear_id
 					id = pda.id
 				if(id)
-					perpname = id.registered
+					perpname = id.registered_name
 				else
 					var/obj/item/device/pda/pda = perp:wear_id
 					perpname = pda.owner

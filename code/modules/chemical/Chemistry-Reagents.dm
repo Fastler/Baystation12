@@ -155,8 +155,7 @@ datum
 					var/obj/effect/decal/cleanable/blood/blood_prop = locate() in T //find some blood here
 					if(!blood_prop) //first blood!
 						blood_prop = new(T)
-						blood_prop.blood_DNA.len++
-						blood_prop.blood_DNA[blood_prop.blood_DNA.len] = list(self.data["blood_DNA"], self.data["blood_type"])
+						blood_prop.blood_DNA = list(list(self.data["blood_DNA"], self.data["blood_type"]))
 
 					for(var/datum/disease/D in self.data["viruses"])
 						var/datum/disease/newVirus = new D.type
@@ -180,7 +179,7 @@ datum
 					var/obj/effect/decal/cleanable/blood/blood_prop = locate() in T
 					if(!blood_prop)
 						blood_prop = new(T)
-						blood_prop.blood_DNA = list(self.data["blood_DNA"])
+						blood_prop.blood_DNA = list(list(self.data["blood_DNA"]))
 					for(var/datum/disease/D in self.data["viruses"])
 						var/datum/disease/newVirus = new D.type
 						blood_prop.viruses += newVirus
@@ -197,7 +196,7 @@ datum
 					var/obj/effect/decal/cleanable/xenoblood/blood_prop = locate() in T
 					if(!blood_prop)
 						blood_prop = new(T)
-						blood_prop.blood_DNA = list(self.data["blood_DNA"])
+						blood_prop.blood_DNA = list(list(self.data["blood_DNA"]))
 					for(var/datum/disease/D in self.data["viruses"])
 						var/datum/disease/newVirus = new D.type
 						blood_prop.viruses += newVirus
@@ -513,6 +512,21 @@ datum
 			description = "A colorless, odorless gas."
 			reagent_state = GAS
 			color = "#808080" // rgb: 128, 128, 128
+			reaction_obj(var/obj/O, var/volume)
+				if((!O) || (!volume))	return 0
+				src = null
+				var/turf/the_turf = get_turf(O)
+				var/datum/gas_mixture/napalm = new
+				napalm.oxygen = volume*10
+				napalm.temperature = T0C
+				the_turf.assume_air(napalm)
+			reaction_turf(var/turf/T, var/volume)
+				src = null
+				var/datum/gas_mixture/napalm = new
+				napalm.oxygen = volume*10
+				napalm.temperature = T0C
+				T.assume_air(napalm)
+				return
 
 		copper
 			name = "Copper"
@@ -975,16 +989,14 @@ datum
 				if(!the_turf)
 					return //No sense trying to start a fire if you don't have a turf to set on fire. --NEO
 				var/datum/gas_mixture/napalm = new
-				var/datum/gas/volatile_fuel/fuel = new
-				fuel.moles = 15
-				napalm.trace_gases += fuel
+				napalm.toxins = volume*10
+				napalm.temperature = T0C
 				the_turf.assume_air(napalm)
 			reaction_turf(var/turf/T, var/volume)
 				src = null
 				var/datum/gas_mixture/napalm = new
-				var/datum/gas/volatile_fuel/fuel = new
-				fuel.moles = 15
-				napalm.trace_gases += fuel
+				napalm.toxins = volume*10
+				napalm.temperature = T0C
 				T.assume_air(napalm)
 				return
 			on_mob_life(var/mob/living/M as mob)
@@ -1450,6 +1462,8 @@ datum
 					M:adjustOxyLoss(-3)
 					M:heal_organ_damage(3,3)
 					M:adjustToxLoss(-3)
+					M:halloss = 0
+					M:hallucination -= 5
 				..()
 				return
 

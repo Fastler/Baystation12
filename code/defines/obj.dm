@@ -356,6 +356,11 @@
 	m_amt = 60
 	g_amt = 20
 
+/obj/item/device/hacktool/engineer
+	name = "door debugger"
+	desc = "An item of immense complexion, it appears to work by magic."
+	icon_state = "hacktool-g"
+
 /obj/item/blueprints
 	name = "station blueprints"
 	desc = "Blueprints of the station. There's stamp \"Classified\" and several coffee stains on it."
@@ -677,6 +682,7 @@
 	density = 1
 	anchored = 1.0
 	layer = 2.8
+	throwpass = 1
 
 	New()
 		..()

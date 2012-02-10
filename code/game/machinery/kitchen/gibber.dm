@@ -50,6 +50,11 @@
 
 /obj/machinery/gibber/attackby(obj/item/weapon/grab/G as obj, mob/user as mob)
 	if(istype(G,/obj/item/weapon/card/emag))
+		var/obj/item/weapon/card/emag/E = G
+		if(E.uses)
+			E.uses--
+		else
+			return
 		user.visible_message( \
 			"\red [user] swipes a strange card through \the [src]'s control panel!", \
 			"\red You swipe a strange card through \the [src]'s control panel!", \
@@ -176,18 +181,25 @@
 			newmeat.reagents.add_reagent("nutriment", sourcenutriment / totalslabs) // Thehehe. Fat guys go first
 			allmeat += newmeat
 
+	for (var/mob/M in world)
+		if (M.client && M.client.holder && (M.client.holder.level != -3))
+			M << "\red [user.name]/[user.ckey] has gibbed [src.occupant.name]/[src.occupant.ckey]"
 	src.occupant.death(1)
 	src.occupant.ghostize()
 	del(src.occupant)
 	spawn(src.gibtime)
 		playsound(src.loc, 'splat.ogg', 50, 1)
 		operating = 0
+		var/iterator = 0
 		for (var/i=1 to allmeat.len)
 			var/obj/item/meatslab = allmeat[i]
-			var/turf/Tx = locate(src.x - i, src.y, src.z)
+			var/turf/Tx = locate(src.x - i + iterator, src.y, src.z)
+			if(Tx.density)
+				iterator += 1
+				Tx = locate(src.x - i + iterator, src.y, src.z)
 			meatslab.loc = src.loc
 			meatslab.throw_at(Tx,i,3)
 			if (!Tx.density)
-				new /obj/effect/decal/cleanable/blood/gibs(Tx,i)
+				new /obj/effect/decal/cleanable/blood/gibs(Tx,i + iterator)
 		src.operating = 0
 		update_icon()
