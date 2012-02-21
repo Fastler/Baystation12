@@ -67,6 +67,10 @@
 			if(master && istype(master, /obj/item/weapon/chem_grenade))
 				var/obj/item/weapon/chem_grenade/M = master
 				M.c_state(1)
+		else
+			if(master && istype(master, /obj/item/weapon/chem_grenade))
+				var/obj/item/weapon/chem_grenade/M = master
+				M.c_state(0)
 		if(holder)
 			holder.update_icon()
 		return
@@ -95,6 +99,7 @@
 
 		if(href_list["time"])
 			timing = text2num(href_list["time"])
+			processing_objects.Add(src)
 			update_icon()
 
 		if(href_list["tp"])

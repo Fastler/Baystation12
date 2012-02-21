@@ -10,7 +10,7 @@ var/global/list/special_roles = list( //keep synced with the defines BE_* in set
 	"malf AI" = IS_MODE_COMPILED("malfunction"),
 	"revolutionary" = IS_MODE_COMPILED("revolution"),
 	"alien candidate" = 1, //always show
-	"pai candidate" = 1, // -- TLE
+	"pAI candidate" = 1, // -- TLE
 	"cultist" = IS_MODE_COMPILED("cult"),
 	"infested monkey" = IS_MODE_COMPILED("monkey"),
 )
@@ -108,9 +108,10 @@ datum/preferences
 
 		flavor_text = ""
 
-		// slot stuff
-		var/slotname
-		var/curslot = 0
+		// slot stuff (Why were they var/var?  --SkyMarshal)
+		slotname
+		curslot = 0
+		disabilities = 0
 
 	New()
 		hair_style = new/datum/sprite_accessory/hair/short
@@ -169,6 +170,14 @@ datum/preferences
 		dat += "<hr><b>Eyes</b><br>"
 		dat += "<a href='byond://?src=\ref[user];preferences=1;eyes=input'>Change Color</a> <font face=\"fixedsys\" size=\"3\" color=\"#[num2hex(r_eyes, 2)][num2hex(g_eyes, 2)][num2hex(b_eyes, 2)]\"><table  style='display:inline;' bgcolor=\"#[num2hex(r_eyes, 2)][num2hex(g_eyes, 2)][num2hex(b_eyes)]\"><tr><td>__</td></tr></table></font>"
 
+		dat += "<hr><b>Disabilities: </b><br>"
+		dat += "Need Glasses? <a href=\"byond://?src=\ref[user];preferences=1;disabilities=0\">[disabilities & (1<<0) ? "Yes" : "No"]</a><br>"
+		dat += "Seizures? <a href=\"byond://?src=\ref[user];preferences=1;disabilities=1\">[disabilities & (1<<1) ? "Yes" : "No"]</a><br>"
+		dat += "Coughing? <a href=\"byond://?src=\ref[user];preferences=1;disabilities=2\">[disabilities & (1<<2) ? "Yes" : "No"]</a><br>"
+		dat += "Tourettes/Twitching? <a href=\"byond://?src=\ref[user];preferences=1;disabilities=3\">[disabilities & (1<<3) ? "Yes" : "No"]</a><br>"
+		dat += "Nervousness? <a href=\"byond://?src=\ref[user];preferences=1;disabilities=4\">[disabilities & (1<<4) ? "Yes" : "No"]</a><br>"
+		dat += "Deafness? <a href=\"byond://?src=\ref[user];preferences=1;disabilities=5\">[disabilities & (1<<5) ? "Yes" : "No"]</a><br>"
+
 		dat += "<hr><b>Flavor Text</b><br>"
 		dat += "<a href='byond://?src=\ref[user];preferences=1;flavor_text=1'>Change</a><br>"
 		if(lentext(flavor_text) <= 40)
@@ -184,7 +193,7 @@ datum/preferences
 					dat += "<b>Be [i]:</b> <a href=\"byond://?src=\ref[user];preferences=1;be_special=[n]\"><b>[src.be_special&(1<<n) ? "Yes" : "No"]</b></a><br>"
 				n++
 		else
-			dat += "<b>You are banned from being syndicate.</b>"
+			dat += "<b>You are banned from being Syndicate.</b>"
 			src.be_special = 0
 		dat += "<hr>"
 
@@ -683,6 +692,9 @@ datum/preferences
 			b_type = "A+"
 			UI = UI_OLD
 			midis = 1
+			disabilities = 0
+		if(link_tags["disabilities"])
+			disabilities ^= (1<<text2num(link_tags["disabilities"])) //MAGIC
 
 		ShowChoices(user)
 
@@ -737,6 +749,25 @@ datum/preferences
 					character.client.ooccolor = ooccolor
 					character.client.be_alien = be_special&BE_ALIEN
 					character.client.be_pai = be_special&BE_PAI
+
+	proc/copydisabilities(mob/living/carbon/human/character)
+		if(disabilities & 1)
+			character.dna.struc_enzymes = setblock(character.dna.struc_enzymes,GLASSESBLOCK,toggledblock(getblock(character.dna.struc_enzymes,GLASSESBLOCK,3)),3)
+		if(disabilities & 2)
+			character.dna.struc_enzymes = setblock(character.dna.struc_enzymes,HEADACHEBLOCK,toggledblock(getblock(character.dna.struc_enzymes,HEADACHEBLOCK,3)),3)
+		if(disabilities & 4)
+			character.dna.struc_enzymes = setblock(character.dna.struc_enzymes,COUGHBLOCK,toggledblock(getblock(character.dna.struc_enzymes,COUGHBLOCK,3)),3)
+		if(disabilities & 8)
+			character.dna.struc_enzymes = setblock(character.dna.struc_enzymes,TWITCHBLOCK,toggledblock(getblock(character.dna.struc_enzymes,TWITCHBLOCK,3)),3)
+		if(disabilities & 16)
+			character.dna.struc_enzymes = setblock(character.dna.struc_enzymes,NERVOUSBLOCK,toggledblock(getblock(character.dna.struc_enzymes,NERVOUSBLOCK,3)),3)
+		if(disabilities & 32)
+			character.dna.struc_enzymes = setblock(character.dna.struc_enzymes,DEAFBLOCK,toggledblock(getblock(character.dna.struc_enzymes,DEAFBLOCK,3)),3)
+		//if(disabilities & 64)
+			//mute
+		//if(disabilities & 128)
+			//character.dna.struc_enzymes = setblock(character.dna.struc_enzymes,BLINDBLOCK,toggledblock(getblock(character.dna.struc_enzymes,BLINDBLOCK,3)),3)
+		character.disabilities = disabilities
 
 #undef UI_OLD
 #undef UI_NEW

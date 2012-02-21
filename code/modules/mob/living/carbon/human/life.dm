@@ -12,6 +12,7 @@
 		life_tick = 0
 		isbreathing = 1
 		holdbreath = 0
+		lyingcheck = 0
 
 /mob/living/carbon/human/Life()
 	set invisibility = 0
@@ -85,7 +86,10 @@
 	handle_health_updates()
 
 	// Update clothing
-	update_clothing()
+//	update_clothing()
+	if(lyingcheck != lying)		//This is a fix for falling down / standing up not updating icons.  Instead of going through and changing every
+		update_clothing()		//instance in the code where lying is modified, I've just added a new variable "lyingcheck" which will be compared
+		lyingcheck = lying		//to lying, so if lying ever changes, update_clothing() will run like normal.
 
 	if(client)
 		handle_regular_hud_updates()
@@ -114,17 +118,22 @@
 	proc
 		handle_health_updates()
 			// if the mob has enough health, she should slowly heal
-			if(health >= 0)
-				var/pr = 10
-				if(stat == 1) // sleeping means faster healing
-					pr += 5
-				if(prob(pr))
-					heal_organ_damage(1,1)
-					adjustToxLoss(-1)
-			else if(health < 0)
-				var/pr = 80
-				if(prob(pr))
-					adjustToxLoss(1)
+			if(stat != 2)
+				if(health >= 0)
+					var/pr = 10
+					if(stat == 1) // sleeping means faster healing
+						pr += 5
+					if(prob(pr))
+						heal_organ_damage(1,1)
+						adjustToxLoss(-1)
+				else if(health < 0)
+					var/pr = 50
+					if(prob(pr))
+						adjustToxLoss(1)
+			else
+				if(!lying)
+					lying = 1 //Seriously, stay down :x
+					update_clothing()
 
 		clamp_values()
 
@@ -149,10 +158,13 @@
 
 
 		handle_disabilities()
-			if(hallucination > 0)
+			if(mutations2 & mHallucination)
+				hallucination = 100
+				halloss = 0
 
+			if(hallucination > 0)
 				if(hallucinations.len == 0 && hallucination >= 20 && health > 0)
-					if(prob(5))
+					if(prob(2)) //Waaay to often.
 						fake_attack(src)
 				//for(var/atom/a in hallucinations)
 				//	a.hallucinate(src)
@@ -166,6 +178,48 @@
 				halloss = 0
 				for(var/atom/a in hallucinations)
 					del a
+
+			if(mutations2 & mSmallsize)
+				if(!(pass_flags & PASSTABLE))
+					pass_flags |= PASSTABLE
+			else
+				if(pass_flags & PASSTABLE)
+					pass_flags &= ~PASSTABLE
+
+
+
+			if (mutations & mRegen)
+				adjustBruteLoss(-2)
+				adjustToxLoss(-2)
+				adjustOxyLoss(-2)
+				adjustFireLoss(-2)
+
+				for(var/datum/organ/external/org in organs)
+					org.brute_dam = max(org.brute_dam - 2, 0)
+					org.burn_dam = max(org.burn_dam - 2, 0)
+				updatehealth()
+
+			if(!(/mob/living/carbon/human/proc/morph in src.verbs))
+				if(mutations & mMorph)
+					src.verbs += /mob/living/carbon/human/proc/morph
+			else
+				if(!(mutations & mMorph))
+					src.verbs -= /mob/living/carbon/human/proc/morph
+
+			if(!(/mob/living/carbon/human/proc/remoteobserve in src.verbs))
+				if(mutations & mRemote)
+					src.verbs += /mob/living/carbon/human/proc/remoteobserve
+			else
+				if(!(mutations & mRemote))
+					src.verbs -= /mob/living/carbon/human/proc/remoteobserve
+
+			if(!(/mob/living/carbon/human/proc/remotesay in src.verbs))
+				if(mutations & mRemotetalk)
+					src.verbs += /mob/living/carbon/human/proc/remotesay
+			else
+				if(!(mutations & mRemotetalk))
+					src.verbs -= /mob/living/carbon/human/proc/remotesay
+
 
 			if (disabilities & 2)
 				if ((prob(1) && paralysis < 1 && r_epil < 1))
@@ -181,16 +235,15 @@
 					drop_item()
 					spawn( 0 )
 						emote("cough")
-						return
 			if (disabilities & 8)
-				if ((prob(10) && paralysis <= 1 && r_Tourette < 1))
+				if ((prob(5) && paralysis <= 1 && r_Tourette < 1))
 					Stun(10)
-					spawn( 0 )
+					spawn(0)
 						switch(rand(1, 3))
 							if(1)
 								emote("twitch")
 							if(2 to 3)
-								say("[prob(50) ? ";" : ""][pick("SHIT", "PISS", "FUCK", "CUNT", "COCKSUCKER", "MOTHERFUCKER", "TITS")]")
+								say("[prob(50) ? ";" : ""][pick("EELS","MOTORBOATS","MERDE","ANTIDISESTABLISHMENTARIANISM","OGOPOGO","POPEMOBILE","RHOMBUS","TUMESCENCE","ZIGGURAT","DIRIGIBLES","WAFFLES","PICKLES","BIKINI","DUCK","KNICKERBOCKERS","LOQUACIOUS","MACADAMIA","MAHOGANY","KUMQUAT","PERCOLATOR","AUBERGINES","FLANGES","GOURDS","DONUTS","CALLIPYGIAN","DARJEELING","DWARFS","MAGMA","ARMOK","BERR","APPLES","SPACEMEN","NINJAS","PIRATES","BUNION")]!")
 						var/old_x = pixel_x
 						var/old_y = pixel_y
 						pixel_x += rand(-2,2)
@@ -198,10 +251,10 @@
 						sleep(2)
 						pixel_x = old_x
 						pixel_y = old_y
-						return
 			if (disabilities & 16)
-				if (prob(10))
+				if (prob(10))//Instant Chad Ore!
 					stuttering = max(10, stuttering)
+
 			if (brainloss >= 60 && stat != 2)
 				if (prob(7))
 					switch(pick(1,2,3))
@@ -261,6 +314,8 @@
 							emote("gasp")
 						updatehealth()
 
+			//As close as I could find to where to put it
+			grav_delay = max(grav_delay-3,0)
 
 		breathe()
 
@@ -271,23 +326,23 @@
 			var/datum/air_group/breath
 			// HACK NEED CHANGING LATER
 			if(health < config.health_threshold_dead)
+				losebreath++
 				isbreathing = 0
 				spawn emote("stopbreath")
 
 			if(holdbreath)
 				isbreathing = 0
-
-			if(isbreathing)
-				// are we running out of air in our lungs?
-				if(losebreath > 0)
-					// inaprovaline prevents the need to breathe for a while
-					if(reagents.has_reagent("inaprovaline"))
-						losebreath = 0
-					else
-						// we're running out of air, gasp for it!
-						if (prob(25)) //High chance of gasping for air
-							spawn emote("gasp")
-			else if(health >= 0)
+			if(losebreath > 0)
+				// inaprovaline prevents the need to breathe for a while
+				if(reagents.has_reagent("inaprovaline"))
+					losebreath = 0
+				else
+					losebreath--
+					// we're running out of air, gasp for it!
+					if (prob(25)) //High chance of gasping for air
+						spawn emote("gasp")
+					isbreathing = 0
+			else if(health >= 0 && !isbreathing)
 				if(holdbreath)
 					// we're simply holding our breath, see if we can hold it longer
 					if(health < 30)
@@ -369,7 +424,7 @@
 			else canmove = 1
 
 		handle_breath(datum/gas_mixture/breath)
-			if(nodamage)
+			if(nodamage || (mutations & mNobreath))
 				return
 
 			if(!breath || (breath.total_moles() == 0))
@@ -453,6 +508,7 @@
 					else if(SA_pp > 0.01)	// There is sleeping gas in their lungs, but only a little, so give them a bit of a warning
 						if(prob(20))
 							spawn(0) emote(pick("giggle", "laugh"))
+					SA.moles = 0 //Hack to stop the damned surgeon from giggling.
 
 
 			if(breath.temperature > (T0C+66) && !(mutations & COLD_RESISTANCE)) // Hot air hurts :(
@@ -851,9 +907,9 @@
 
 			density = !( lying )
 
-			if ((sdisabilities & 1 || istype(glasses, /obj/item/clothing/glasses/blindfold)))
+			if ((disabilities & 128 || istype(glasses, /obj/item/clothing/glasses/blindfold)))
 				blinded = 1
-			if ((sdisabilities & 4 || istype(l_ear, /obj/item/clothing/ears/earmuffs) || istype(r_ear, /obj/item/clothing/ears/earmuffs)))
+			if ((disabilities & 32 || istype(l_ear, /obj/item/clothing/ears/earmuffs) || istype(r_ear, /obj/item/clothing/ears/earmuffs)))
 				ear_deaf = 1
 
 			if (eye_blurry > 0)
@@ -1078,7 +1134,7 @@
 				else
 					blind.layer = 0
 
-					if (disabilities & 1 && !istype(glasses, /obj/item/clothing/glasses/regular) )
+					if ((disabilities & 1 && ((glasses && !glasses.prescription) || !glasses)) || (glasses && glasses.prescription && !(disabilities & 1)))
 						client.screen += hud_used.vimpaired
 
 					if (eye_blurry)
@@ -1095,9 +1151,10 @@
 				if (machine)
 					if (!( machine.check_eye(src) ))
 						reset_view(null)
-				else
-					if(!client.adminobs)
-						reset_view(null)
+				else if(!(mutations & mRemote) && !client.adminobs)
+					reset_view(null)
+					if(remoteobserve)
+						remoteobserve = null
 
 			return 1
 

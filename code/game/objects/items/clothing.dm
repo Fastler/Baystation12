@@ -174,6 +174,7 @@ THERMAL GLASSES
 	desc = A.desc
 	icon_state = A.icon_state
 	item_state = A.item_state
+	usr.update_clothing()
 	color = A.color
 
 /obj/item/clothing/under/chameleon/emp_act(severity)
@@ -290,7 +291,7 @@ THERMAL GLASSES
 		state = "enabled"
 	usr << "Its mag-pulse traction system appears to be [state]."
 
-/obj/item/clothing/suit/suit/verb/toggle()
+/obj/item/clothing/suit/lawyer/verb/toggle()
 	set name = "Toggle Jacket Buttons"
 	set category = "Object"
 	if(src.icon_state == "suitjacket_blue_open")
@@ -354,6 +355,12 @@ THERMAL GLASSES
 		usr << "You button up the labcoat."
 	else if(src.icon_state == "labcoat_pink")
 		src.icon_state = "labcoat_pink_open"
+		usr << "You unbutton the labcoat."
+	else if(src.icon_state == "labcoat_sleeve_open")
+		src.icon_state = "labcoat_sleeve"
+		usr << "You button up the labcoat."
+	else if(src.icon_state == "labcoat_sleeve")
+		src.icon_state = "labcoat_sleeve_open"
 		usr << "You unbutton the labcoat."
 
 	else

@@ -194,7 +194,7 @@ datum
 			name = "Dexalin"
 			id = "dexalin"
 			result = "dexalin"
-			required_reagents = list("oxygen" = 2)
+			required_reagents = list("oxygen" = 2, "plasma" = 0.1)
 			required_catalysts = list("plasma" = 5)
 			result_amount = 1
 
@@ -244,7 +244,7 @@ datum
 			name = "Clonexadone"
 			id = "clonexadone"
 			result = "clonexadone"
-			required_reagents = list("cryoxadone" = 1, "sodium" = 1)
+			required_reagents = list("cryoxadone" = 1, "sodium" = 1, "plasma" = 0.1)
 			required_catalysts = list("plasma" = 5)
 			result_amount = 2
 
@@ -605,7 +605,7 @@ datum
 			required_other = 2
 			on_reaction(var/datum/reagents/holder, var/created_volume)
 				var/location = get_turf(holder.my_atom)
-				new /obj/item/weapon/reagent_containers/food/snacks/meat/syntiflesh(location)
+				new /obj/item/weapon/reagent_containers/food/snacks/sliceable/meat/syntiflesh(location)
 				return
 
 		metroidenzyme
@@ -894,7 +894,7 @@ datum
 			result_amount = 1
 			on_reaction(var/datum/reagents/holder, var/created_volume)
 				var/location = get_turf(holder.my_atom)
-				new /obj/item/weapon/reagent_containers/food/snacks/meat/syntiflesh(location)
+				new /obj/item/weapon/reagent_containers/food/snacks/sliceable/meat/syntiflesh(location)
 				return
 
 		hot_ramen

@@ -209,7 +209,7 @@
 
 	attack_self(mob/user as mob)
 		if(active == 2)
-			attached_device.attack_self(usr)
+			attached_device.attack_self(user)
 			return
 		user.machine = src
 		var/dat = {"<B> Grenade properties: </B>
@@ -292,8 +292,9 @@
 		c_state(var/i = 0)
 			if(i)
 				icon_state = initial(icon_state) + "_armed"
+			else
+				icon_state = initial(icon_state) + "_locked"
 			return
-
 
 	large
 		name = "Large Chem Grenade"
@@ -311,6 +312,7 @@
 
 		New()
 			..()
+			attached_device = new /obj/item/device/assembly/timer(src)
 			var/obj/item/weapon/reagent_containers/glass/beaker/B1 = new(src)
 			var/obj/item/weapon/reagent_containers/glass/beaker/B2 = new(src)
 
@@ -330,6 +332,7 @@
 
 		New()
 			..()
+			attached_device = new /obj/item/device/assembly/timer(src)
 			var/obj/item/weapon/reagent_containers/glass/beaker/B1 = new(src)
 			var/obj/item/weapon/reagent_containers/glass/beaker/B2 = new(src)
 
@@ -349,6 +352,7 @@
 
 		New()
 			..()
+			attached_device = new /obj/item/device/assembly/timer(src)
 			var/obj/item/weapon/reagent_containers/glass/beaker/B1 = new(src)
 			var/obj/item/weapon/reagent_containers/glass/beaker/B2 = new(src)
 
@@ -965,7 +969,7 @@
 						user << "\red There is already a blood sample in this syringe"
 						return
 					if(istype(target, /mob/living/carbon))//maybe just add a blood reagent to all mobs. Then you can suck them dry...With hundreds of syringes. Jolly good idea.
-						var/amount = src.reagents.maximum_volume - src.reagents.total_volume
+						var/amount = max(src.reagents.maximum_volume - src.reagents.total_volume - 2, 0)
 						var/mob/living/carbon/T = target
 						var/datum/reagent/B = new /datum/reagent/blood
 						if(!T.dna)
@@ -1011,6 +1015,10 @@
 						//for(var/D in B.data)
 						//	world << "Data [D] = [B.data[D]]"
 						//debug
+
+						// also transfer some of the reagents other than blood
+						T.reagents.trans_to(src, 2)
+
 						src.reagents.reagent_list += B
 						src.reagents.update_total()
 						src.on_reagent_change()
@@ -1273,6 +1281,13 @@
 		..()
 		src.pixel_x = rand(-5.0, 5)						//Randomizes postion slightly.
 		src.pixel_y = rand(-5.0, 5)
+
+
+	proc/foodloc(var/mob/M, var/obj/item/O)
+		if(O.loc == M)
+			return M.loc
+		else
+			return O.loc
 
 /obj/item/weapon/reagent_containers/food/snacks		//Food items that are eaten normally and don't leave anything behind.
 	name = "snack"

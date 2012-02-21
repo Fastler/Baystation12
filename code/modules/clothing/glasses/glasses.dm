@@ -13,9 +13,12 @@
 	origin_tech = "magnets=2;engineering=2"
 	vision_flags = SEE_TURFS
 
+	prescription
+		prescription = 1
+
 /obj/item/clothing/glasses/science
 	name = "Science Goggles"
-	desc = "nothing"
+	desc = "Used for !!SCIENCE!!"
 	icon_state = "purple"
 	item_state = "glasses"
 
@@ -41,6 +44,7 @@
 	desc = "Made by Nerd. Co."
 	icon_state = "glasses"
 	item_state = "glasses"
+	prescription = 1
 
 /obj/item/clothing/glasses/gglasses
 	name = "Green Glasses"
@@ -55,6 +59,25 @@
 	item_state = "sunglasses"
 	protective_temperature = 1300
 	darkness_view = -1
+
+	prescription
+		prescription = 1
+
+/obj/item/clothing/glasses/sunglasses/big
+	desc = "Strangely ancient technology used to help provide rudimentary eye cover. Larger than average enhanced shielding blocks many flashes."
+	icon_state = "bigsunglasses"
+	item_state = "bigsunglasses"
+	protective_temperature = 1400
+
+//ultimate glasses
+/obj/item/clothing/glasses/hud/security/jensenshades
+	name = "Augmented shades"
+	desc = "Polarized bioneural eyewear, designed to augment your vision."
+	icon_state = "jensenshades"
+	item_state = "jensenshades"
+	protective_temperature = 1500
+	vision_flags = SEE_MOBS
+	invisa_view = 2
 
 /obj/item/clothing/glasses/sunglasses/sechud
 	name = "HUDSunglasses"

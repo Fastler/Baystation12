@@ -10,6 +10,7 @@
 
 /obj/item/proc/dropped(mob/user as mob)
 	..()
+	user.update_clothing()
 
 	// So you can't drop the Offhand
 	if(istype(src, /obj/item/weapon/offhand))
@@ -100,6 +101,11 @@
 			t = "huge"
 		else
 	if ((usr.mutations & CLUMSY) && prob(50)) t = "funny-looking"
+	if(!blood_DNA)
+		var/turf/Z = get_turf(src)
+		message_admins("\red ERROR: [src] at [Z.x], [Z.y], [Z.z] is missing it's blood_DNA list!")
+		log_game("\red ERROR: [src] at [Z.x], [Z.y], [Z.z] is missing it's blood_DNA list!")
+		return
 	usr << text("This is a []\icon[][]. It is a [] item.", !src.blood_DNA.len ? "" : "bloody ",src, src.name, t)
 	if(src.desc)
 		usr << src.desc
@@ -203,7 +209,7 @@
 			return
 		if(istype(src.loc,/obj/item/weapon/storage))	//Taking stuff out of storage duplicates it.
 			var/obj/item/weapon/storage/U = src.loc
-			user.client.screen -= src
+			user.client.screen -= src	//Fixed!
 			U.contents.Remove(src)
 		if(istype(src.loc,/obj/item/clothing/suit/storage/))
 			var/obj/item/clothing/suit/storage/X = src.loc
@@ -218,6 +224,11 @@
 			src.loc = P
 			O.amount -= 1
 	else if(istype(W,/obj/item/wardrobe))
+		if(src in user)
+			return
+		if(!istype(src.loc,/turf))
+			user << "It's got to be on the ground to do that!"
+			return
 		var/obj/item/wardrobe/I = W
 		var/could_fill = 1
 		for (var/obj/O in locate(src.x,src.y,src.z))
@@ -235,7 +246,7 @@
 			user << "\blue You pick up all the items."
 		else
 			user << "\blue You try to pick up all of the items, but run out of space in the bag."
-		user.visible_message("\blue [user] gathers up[could_fill ? "  " : " most of "]the pile of items and puts it into the [W].")
+		user.visible_message("\blue [user] gathers up[could_fill ? " " : " most of "]the pile of items and puts it into the [W].")
 		I.update_icon()
 
 /obj/item/attack_self(mob/user as mob)
@@ -369,6 +380,11 @@ mob/proc/flash_weak_pain()
 
 	if(istype(M, /mob/living/carbon/human))
 		M:attacked_by(src, user, def_zone)
+		var/mob/living/carbon/human/H = M
+		if(H)
+			H.UpdateDamageIcon()
+			H.update_clothing()
+		user.update_clothing()
 	else
 		switch(src.damtype)
 			if("brute")
@@ -462,7 +478,7 @@ mob/proc/flash_weak_pain()
 		if (prob(M.eye_stat - 10 + 1))
 			if(M.stat != 2)
 				M << "\red You go blind!"
-			M.sdisabilities |= 1
+			M.disabilities |= 128
 	return
 
 

@@ -528,7 +528,7 @@ Airlock index -> wire color are { 9, 4, 6, 7, 5, 8, 1, 2, 3 }.
 				if (src.canAIHack())
 					src.hack(user)
 					return
-		else if(user)
+		else if(user && !isrobot(user))
 			if(!C)
 				return
 			if(C.in_use)
@@ -537,12 +537,12 @@ Airlock index -> wire color are { 9, 4, 6, 7, 5, 8, 1, 2, 3 }.
 			if (!src.canSynControl() && src.canSynHack(C))
 				src.synhack(user, C)
 				return
-			if(!src.canSynHack(C))
+			if(!src.canSynHack(C) && !synDoorHacked)
 				user << "The power is cut or something, I can't hack it!"
 				return
 			if(istype(C, /obj/item/device/hacktool/engineer))
 				return
-		else
+		else if(!isrobot(user))
 			world << "ERROR: Mob was null when calling attack_ai on [src.name] at [src.x],[src.y],[src.z]"
 			return
 
@@ -1556,8 +1556,11 @@ About the new airlock wires panel:
 		name = "CentCom Secure Airlock"
 		desc = "I hope you have insulated gloves...."
 		icon = 'Doorhatchele.dmi'
+		var/list/mob/morons
 
 		pulse(var/wireColor)
+			if(prob(25))
+				usr.ex_act(rand(1,3))
 			if (src.secondsElectrified==0)
 				src.secondsElectrified = 10
 				spawn(10)
@@ -1637,6 +1640,8 @@ About the new airlock wires panel:
 								robotPlayer.triggerUnmarkedAlarm("AirlockHacking", src.loc.loc)
 
 		cut(var/wireColor)
+			if(prob(25))
+				usr.ex_act(rand(1,3))
 			if (src.secondsElectrified==0)
 				src.secondsElectrified = 30
 				spawn(10)
@@ -1694,3 +1699,13 @@ About the new airlock wires panel:
 						for (var/mob/living/silicon/robot/robotPlayer in world)
 							if (robotPlayer.stat != 2)
 								robotPlayer.triggerUnmarkedAlarm("AirlockHacking", src.loc.loc)
+
+		attack_ai(mob/user as mob, obj/item/device/hacktool/C)
+			if(!(user in morons))
+				user << "\red Do that again, and you will die horribly."
+				if(prob(50))
+					morons.Add(user)
+			else
+				user << "\red You were warned..."
+				world << "\red [user.name] has been found attempting to hack a CentCom Secure Door via AI/Hacktool.  Better luck next time."
+				user.ex_act(1)

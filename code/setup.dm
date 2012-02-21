@@ -155,11 +155,22 @@ var/const
 	XRAY			=(1<<2)
 	HULK			=(1<<3)
 	CLUMSY			=(1<<4)
-	//FAT				=(1<<5)
+	FAT				=(1<<5)
 	HUSK			=(1<<6)
 	LASER			=(1<<7)
 	HEAL			=(1<<8)
-
+	mNobreath		=(1<<9)
+	mRemote			=(1<<10)
+	mRegen			=(1<<11)
+	mRun			=(1<<12)
+	mRemotetalk		=(1<<13)
+	mMorph			=(1<<14)
+	mBlend			=(1<<15)
+//the "&" operator cannot go higher than (2^16)-1
+	mHallucination	=(1<<0)
+	mFingerprints	=(1<<1)
+	mShock			=(1<<2)
+	mSmallsize		=(1<<3)
 
 //mob/var/stat things
 var/const

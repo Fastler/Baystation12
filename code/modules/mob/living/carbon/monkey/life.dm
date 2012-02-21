@@ -1,10 +1,19 @@
 /mob/living/carbon/monkey
-	var
-		oxygen_alert = 0
-		toxins_alert = 0
-		fire_alert = 0
+	name = "monkey"
+	voice_name = "monkey"
+	voice_message = "chimpers"
+	say_message = "chimpers"
+	icon = 'monkey.dmi'
+	icon_state = "monkey1"
+	gender = NEUTER
+	pass_flags = PASSTABLE
 
-		temperature_alert = 0
+	var/obj/item/weapon/card/id/wear_id = null // Fix for station bounced radios -- Skie
+
+	var/oxygen_alert = 0
+	var/toxins_alert = 0
+	var/fire_alert = 0
+	var/temperature_alert = 0
 
 
 /mob/living/carbon/monkey/Life()
@@ -36,6 +45,7 @@
 	//code. Very ugly. I dont care. Moving this stuff here so its easy
 	//to find it.
 	src.blinded = null
+
 
 	//Disease Check
 	handle_virus_updates()
@@ -469,9 +479,9 @@
 
 			src.density = !( src.lying )
 
-			if (src.sdisabilities & 1)
+			if (src.disabilities & 128)
 				src.blinded = 1
-			if (src.sdisabilities & 4)
+			if (src.disabilities & 32)
 				src.ear_deaf = 1
 
 			if (src.eye_blurry > 0)

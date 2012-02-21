@@ -1,3 +1,15 @@
+/obj/effect/sign/barsign
+	icon = 'barsigns.dmi'
+	icon_state = "empty"
+	anchored = 1
+	New()
+		ChangeSign(pick("pinkflamingo", "magmasea", "limbo", "rustyaxe", "armokbar", "brokendrum"))
+		return
+	proc/ChangeSign(var/Text)
+		src.icon_state = "[Text]"
+		//ul_SetLuminosity(4)
+		return
+
 /obj/effect/sign/securearea/ex_act(severity)
 	switch(severity)
 		if(1.0)

@@ -463,9 +463,9 @@
 
 			src.density = !( src.lying )
 
-			if ((src.sdisabilities & 1))
+			if ((src.disabilities & 128))
 				src.blinded = 1
-			if ((src.sdisabilities & 4))
+			if ((src.disabilities & 32))
 				src.ear_deaf = 1
 
 			if (src.eye_blurry > 0)
@@ -549,7 +549,7 @@
 			if (src.stat != 2)
 				if (src.machine)
 					if (!( src.machine.check_eye(src) ))
-						src.reset_view(null)
+						reset_view(null)
 				else
 					if(!client.adminobs)
 						reset_view(null)

@@ -79,7 +79,7 @@ TABLE AND RACK OBJECT INTERATIONS
 
 
 /obj/structure/table/attack_hand(mob/user as mob)
-	if ((usr.mutations & HULK))
+	if (usr.mutations & HULK)
 		usr << text("\blue You destroy the table.")
 		for(var/mob/O in oviewers())
 			if ((O.client && !( O.blinded )))
@@ -92,6 +92,16 @@ TABLE AND RACK OBJECT INTERATIONS
 			new /obj/item/weapon/table_parts( src.loc )
 		src.density = 0
 		del(src)
+/*	if (user.mutations2 & mSmallsize)
+		step(user, get_dir(user, src))
+		if (user.loc == src.loc)
+			user.layer = TURF_LAYER
+			user.update_clothing()
+			for(var/mob/M in viewers(user, null))
+				M.show_message("[user] hides under the table!", 1)
+				//Foreach goto(69)
+				*/
+//Googol never tested this shit.
 	return
 
 

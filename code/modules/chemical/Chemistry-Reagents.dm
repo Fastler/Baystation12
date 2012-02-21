@@ -540,6 +540,21 @@ datum
 			description = "A colorless, odorless, tasteless gas."
 			reagent_state = GAS
 			color = "#808080" // rgb: 128, 128, 128
+			reaction_obj(var/obj/O, var/volume)
+				if((!O) || (!volume))	return 0
+				src = null
+				var/turf/the_turf = get_turf(O)
+				var/datum/gas_mixture/napalm = new
+				napalm.nitrogen = volume*10
+				napalm.temperature = T0C
+				the_turf.assume_air(napalm)
+			reaction_turf(var/turf/T, var/volume)
+				src = null
+				var/datum/gas_mixture/napalm = new
+				napalm.nitrogen = volume*10
+				napalm.temperature = T0C
+				T.assume_air(napalm)
+				return
 
 		hydrogen
 			name = "Hydrogen"
@@ -825,7 +840,6 @@ datum
 				if(!M) M = holder.my_atom
 				M.mutations = 0
 				M.disabilities = 0
-				M.sdisabilities = 0
 				..()
 				return
 
@@ -1287,11 +1301,9 @@ datum
 					holder.remove_reagent("zombiepowder", 5)
 				M.brainloss = 0
 				M.disabilities = 0
-				M.sdisabilities = 0
 				M.eye_blurry = 0
 				M.eye_blind = 0
 				M.disabilities &= ~1
-				M.sdisabilities &= ~1
 				M.SetWeakened(0)
 				M.SetStunned(0)
 				M.SetParalysis(0)
@@ -1767,7 +1779,7 @@ datum
 				if(!M) M = holder.my_atom
 				M:bodytemperature += 5
 				if(prob(40) && !istype(M, /mob/living/carbon/metroid))
-					M.take_organ_damage(0, 1)
+					M.apply_damage(1, BURN, pick("head", "chest"))
 
 				if(istype(M, /mob/living/carbon/metroid))
 					M:bodytemperature += rand(5,20)
@@ -1822,7 +1834,7 @@ datum
 				if(!M) M = holder.my_atom
 				M:bodytemperature -= 5
 				if(prob(40))
-					M.take_organ_damage(0, 1)
+					M.apply_damage(1, BURN, pick("head", "chest"))
 				if(prob(80) && istype(M, /mob/living/carbon/metroid))
 					M.adjustFireLoss(rand(5,20))
 					M << "\red You feel a terrible chill inside your body!"

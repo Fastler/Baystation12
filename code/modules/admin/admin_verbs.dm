@@ -139,6 +139,8 @@
 			verbs += /client/proc/only_one // Fateweaver suggested I do this - Doohl
 			verbs += /client/proc/callprocgen
 			verbs += /client/proc/callprocobj
+			verbs += /client/proc/cmd_debug_prints
+			verbs += /client/proc/cmd_debug_blood
 
 		if (holder.level >= 5)//Game Admin********************************************************************
 			verbs += /obj/admins/proc/view_txt_log
@@ -262,7 +264,6 @@
 			verbs += /client/proc/unban_panel
 			verbs += /client/proc/jobbans
 			verbs += /client/proc/playernotes
-			verbs += /client/proc/unjobban_panel
 			verbs += /obj/admins/proc/vmode
 			verbs += /obj/admins/proc/votekill
 			verbs += /client/proc/voting
@@ -389,7 +390,6 @@
 	verbs -= /client/proc/unban_panel
 	verbs -= /client/proc/jobbans
 	verbs -= /client/proc/playernotes
-	verbs -= /client/proc/unjobban_panel
 	verbs -= /obj/admins/proc/vmode
 	verbs -= /obj/admins/proc/votekill
 	verbs -= /client/proc/voting
@@ -420,6 +420,8 @@
 	verbs -= /client/proc/delbook
 	verbs -= /client/proc/Force_Event_admin
 	verbs -= /client/proc/radioalert
+	verbs -= /client/proc/cmd_debug_prints
+	verbs -= /client/proc/cmd_debug_blood
 
 	return
 
@@ -481,7 +483,7 @@
 	return
 
 /client/proc/jobbans()
-	set name = "Display Job bans"
+	set name = "Unjobban Panel"
 	set category = "Admin"
 	if(holder)
 		holder.Jobbans()
@@ -865,13 +867,15 @@
 	M.update_body()
 	M.update_face()
 	M.update_clothing()
+	M.check_dna(M)
 
 
 /client/proc/radioalert()
 	set category = "Fun"
 	set name = "Create Radio Alert"
-	var/message = input("Choose a message! (Don't forget the \"says, \" or similar at the start.)", "Message") as message|null
+	var/message = input("Choose a message! (Don't forget the \"says, \" or similar at the start.)", "Message") as text|null
 	var/from = input("From whom? (Who's saying this?)", "From") as text|null
-	var/obj/item/device/radio/intercom/a = new /obj/item/device/radio/intercom(null)
-	a.autosay(message,from)
-	del(a)
+	if(message && from)
+		var/obj/item/device/radio/intercom/a = new /obj/item/device/radio/intercom(null)
+		a.autosay(message,from)
+		del(a)
